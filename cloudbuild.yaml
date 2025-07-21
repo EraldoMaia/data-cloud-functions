@@ -1,0 +1,25 @@
+substitutions:
+  _PROJECT_ID: 'data-ops-466417'
+
+logsBucket: 'gs://cloudbuild-logs-data-ops-466417'
+timeout: 3600s
+
+steps:
+
+  # 1. Terraform Init
+  - name: 'hashicorp/terraform:latest'
+    entrypoint: 'terraform'
+    args: ['init']
+    dir: 'terraform'
+
+  # 2. Terraform Plan
+  - name: 'hashicorp/terraform:latest'
+    entrypoint: 'terraform'
+    args: ['plan', '-out=tfplan']
+    dir: 'terraform'
+
+  # 3. Terraform apply
+  - name: 'hashicorp/terraform:latest'
+    entrypoint: 'terraform'
+    args: ['apply', '-auto-approve', 'tfplan']
+    dir: 'terraform'
