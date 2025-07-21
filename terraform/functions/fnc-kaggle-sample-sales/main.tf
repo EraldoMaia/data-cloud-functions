@@ -1,5 +1,5 @@
 module "fnc_kaggle_sample_sales" {
-  source        = "../modules/cloud_function" # caminho do módulo Terraform
+  source        = "../../modules/cloud_function" # caminho do módulo Terraform
   name          = "fnc-kaggle-sample-sales"   # nome da função no GCP
   runtime       = "python311"                 # runtime suportado no GCP
   entry_point   = "main"                       # nome da função dentro do main.py
