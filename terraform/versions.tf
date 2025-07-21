@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = var.tf_state_gcf_bucket
+    bucket = "cloudbuild-logs-cloud-function-466417"
     prefix = "terraform/state"
   }
   

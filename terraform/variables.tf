@@ -16,12 +16,6 @@ variable "bucket_source" {
   description = "Nome do bucket onde serao armazenadas as funcoes."
 }
 
-variable "tf_state_gcf_bucket" {
-  description = "Bucket GCS para armazenar o tfstate e os logs do Cloud Build."
-  type        = string
-  default     = "cloudbuild-logs-cloud-function-466417"
-}
-
 variable "service_account_email" {
   description = "Service Account que a função irá usar"
   type        = string
