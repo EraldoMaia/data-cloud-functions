@@ -1,0 +1,25 @@
+
+steps:
+  - name: 'python:3.10'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -r requirements.txt -t ./packages
+        cp main.py ./packages/
+        cd packages && zip -r ../fnc-kaggle-sample-sales.zip .
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', 'fnc-kaggle-sample-sales.zip', 'gs://$FUNCTION_BUCKET/fnc-kaggle-sample-sales.zip']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'kaggle-to-gcs'
+      - '--gen2'
+      - '--runtime=python310'
+      - '--entry-point=main'
+      - '--region=$REGION'
+      - '--source=gs://$FUNCTION_BUCKET/fnc-kaggle-sample-sales.zip'
+      - '--set-env-vars=FUNCTION_BUCKET=$FUNCTION_BUCKET'
