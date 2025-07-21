@@ -1,5 +1,5 @@
 
-module "fnc_kaggle_sample_sales" {
+module "fnc-kaggle-sample-sales" {
   source             = "../modules/cloud_function"
   name               = "fnc-kaggle-sample-sales"
   region             = var.region
