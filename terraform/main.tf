@@ -1,10 +1,23 @@
+# Bucket para armazenar o tfstate (precisa existir antes do primeiro init remoto)
+resource "google_storage_bucket" "tfstate_bucket" {
+  name          = var.tfstate_bucket
+  location      = var.region
+  force_destroy = false
 
-module "fnc-kaggle-sample-sales" {
-  source             = "./functions/fnc-kaggle-sample-sales"
-  name               = "fnc-kaggle-sample-sales"
-  region             = var.region
-  runtime            = "python310"
-  entry_point        = "main"
-  bucket             = var.cloud_function_bucket
-  object             = "fnc-kaggle-sample-sales.zip"
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 365
+    }
+  }
+}
+
+module "fnc_kaggle_sample_sales" {
+  source = "./functions/fnc-kaggle-sample-sales.tf"
 }
