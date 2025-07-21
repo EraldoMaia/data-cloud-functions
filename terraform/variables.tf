@@ -10,8 +10,19 @@ variable "project_id" {
   description = "Id do projeto onde os recursos serao criados."
 }
 
-variable "cloud_function_bucket" {
+variable "bucket_source" {
   type        = string
   default     = "tf-cloud-functions-bucket"
   description = "Nome do bucket onde serao armazenadas as funcoes."
+}
+
+variable "tfstate_bucket" {
+  description = "Bucket GCS para armazenar o tfstate"
+  type        = string
+}
+
+variable "service_account_email" {
+  description = "Service Account que a função irá usar"
+  type        = string
+  default     = "cloud-function-sa@data-ops-466417.iam.gserviceaccount.com"
 }
