@@ -13,8 +13,7 @@ steps:
       - builds
       - submit
       - ./functions/$_FUNCTION_NAME/cloudbuild.yaml
-      - .
-      
+
   # 2. Terraform Init
   - name: 'hashicorp/terraform:latest'
     entrypoint: 'terraform'
