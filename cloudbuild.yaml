@@ -1,19 +1,24 @@
 substitutions:
-  _FUNCTION_NAME: 'fnc-kaggle-sample-sales' # Altere de acordo com a funcao a ser carregada
+  _FUNCTION_NAME: 'fnc-kaggle-sample-sales'     # Altere de acordo com a funcao a ser carregada
+  _FUNCTION_BUCKET: 'tf-cloud-functions-bucket'
 
 logsBucket: 'cloudbuild-logs-cloud-function-466417'
 timeout: 3600s
 
 steps:
 
-  # 1. Chama o build da função
-  # Altere o _FUNCTION_NAME de acordo com a funcao a ser carregada
-  - name: 'gcr.io/cloud-builders/gcloud'
+  # 1. Build da Função (zip + upload)
+  - name: 'python:3.10'
+    entrypoint: 'bash'
     args:
-      - builds
-      - submit
-      - ./functions/$_FUNCTION_NAME
-      - '--config=cloudbuild.yaml'
+      - '-c'
+      - |
+        pip install -r ./functions/$_FUNCTION_NAME/requirements.txt -t ./packages
+        cp ./functions/$_FUNCTION_NAME/main.py ./packages/
+        cd packages && zip -r ../$_FUNCTION_NAME.zip .
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', '$_FUNCTION_NAME.zip', 'gs://$_FUNCTION_BUCKET/$_FUNCTION_NAME.zip']
 
   # 2. Terraform Init
   - name: 'hashicorp/terraform:latest'
