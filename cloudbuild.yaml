@@ -7,35 +7,33 @@ timeout: 3600s
 
 steps:
 
-  # 1. Build da Função (zip + upload)
+  # 1. Zipa a pasta da funcao com suas dependencias
   - name: 'python:3.10'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         apt-get update && apt-get install -y zip
-        rm -rf ./packages
-        mkdir -p ./packages
-        pip install -r ./functions/$_FUNCTION_NAME/requirements.txt -t ./packages
-        cp ./functions/$_FUNCTION_NAME/main.py ./packages/
-        cd packages && zip -r ../$_FUNCTION_NAME.zip .
+        cd functions/$_FUNCTION_NAME
+        zip -r ../../$_FUNCTION_NAME.zip .
 
+  # 2. Copia o zip para o bucket
   - name: 'gcr.io/cloud-builders/gsutil'
     args: ['cp', '$_FUNCTION_NAME.zip', 'gs://$_FUNCTION_BUCKET/$_FUNCTION_NAME.zip']
 
-  # 2. Terraform Init
+  # 3. Terraform Init
   - name: 'hashicorp/terraform:latest'
     entrypoint: 'terraform'
     args: ['init']
     dir: 'terraform'
 
-  # 3. Terraform Plan
+  # 4. Terraform Plan
   - name: 'hashicorp/terraform:latest'
     entrypoint: 'terraform'
     args: ['plan', '-out=tfplan']
     dir: 'terraform'
 
-  # 4. Terraform Apply
+  # 5. Terraform Apply
   - name: 'hashicorp/terraform:latest'
     entrypoint: 'terraform'
     args: ['apply', '-auto-approve', 'tfplan']
