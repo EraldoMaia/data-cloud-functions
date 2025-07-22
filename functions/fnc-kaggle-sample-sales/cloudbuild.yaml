@@ -1,6 +1,5 @@
 substitutions:
   _FUNCTION_BUCKET: 'tf-cloud-functions-bucket'
-  _REGION: 'southamerica-east1'
 
 steps:
   - name: 'python:3.10'
