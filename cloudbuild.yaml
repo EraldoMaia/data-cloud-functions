@@ -1,25 +1,30 @@
 substitutions:
   _FUNCTION_NAME: 'fnc-kaggle-sample-sales'     # Altere de acordo com a funcao a ser carregada
   _FUNCTION_BUCKET: 'tf-cloud-functions-bucket'
+  _PROJECT_ID: "data-ops-466417"
 
 logsBucket: 'cloudbuild-logs-cloud-function-466417'
 timeout: 3600s
 
 steps:
 
-  # 0. Verifica e deleta a função existente (usando Cloud Run como fallback)
+  # 0. Verifica e deleta a função existente
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo "Verificando se a função $_FUNCTION_NAME existe..."
-        if gcloud functions describe $_FUNCTION_NAME --region=$_REGION --gen2 >/dev/null 2>&1; then
-          echo "Função encontrada via Cloud Functions. Deletando..."
-          gcloud functions delete $_FUNCTION_NAME --region=$_REGION --gen2 --quiet
-        elif gcloud run services describe $_FUNCTION_NAME --region=$_REGION >/dev/null 2>&1; then
-          echo "Função encontrada via Cloud Run. Deletando pelo Cloud Functions..."
-          gcloud functions delete $_FUNCTION_NAME --region=$_REGION --gen2 --quiet
+        if gcloud functions describe $_FUNCTION_NAME \
+            --region=$_REGION \
+            --gen2 \
+            --project=$_PROJECT_ID >/dev/null 2>&1; then
+          echo "Função encontrada. Deletando..."
+          gcloud functions delete $_FUNCTION_NAME \
+            --region=$_REGION \
+            --gen2 \
+            --quiet \
+            --project=$_PROJECT_ID
         else
           echo "Função não encontrada. Pulando deleção."
         fi
