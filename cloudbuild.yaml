@@ -2,6 +2,7 @@ substitutions:
   _FUNCTION_NAME: 'fnc-kaggle-sample-sales'     # Altere de acordo com a funcao a ser carregada
   _FUNCTION_BUCKET: 'tf-cloud-functions-bucket'
   _PROJECT_ID: "data-ops-466417"
+  _REGION: 'southamerica-east1'  # Altere de acordo com a regiao
 
 logsBucket: 'cloudbuild-logs-cloud-function-466417'
 timeout: 3600s
@@ -14,7 +15,7 @@ steps:
     args:
       - '-c'
       - |
-        echo "Verificando se a função $_FUNCTION_NAME existe..."
+        echo "Verificando se a função $_FUNCTION_NAME existe na região $_REGION e no projeto $_PROJECT_ID..."
         if gcloud functions describe $_FUNCTION_NAME \
             --region=$_REGION \
             --gen2 \
