@@ -13,6 +13,9 @@ steps:
     args:
       - '-c'
       - |
+        apt-get update && apt-get install -y zip
+        rm -rf ./packages
+        mkdir -p ./packages
         pip install -r ./functions/$_FUNCTION_NAME/requirements.txt -t ./packages
         cp ./functions/$_FUNCTION_NAME/main.py ./packages/
         cd packages && zip -r ../$_FUNCTION_NAME.zip .
