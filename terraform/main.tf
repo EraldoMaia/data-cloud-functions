@@ -1,3 +1,6 @@
 module "fnc_kaggle_sample_sales" {
-  source = "./functions/fnc-kaggle-sample-sales" # caminho do módulo Terraform
+  source = "./modules/cloud_function"
+
+  name          = "fnc-kaggle-sample-sales"
+  runtime       = "python310"
 }
