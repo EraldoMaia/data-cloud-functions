@@ -7,7 +7,7 @@ timeout: 3600s
 
 steps:
 
-  # 0. Verifica e deleta a função existente (2nd Gen)
+  # 0. Verifica e deleta a função existente (usando Cloud Run como fallback)
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
@@ -15,7 +15,10 @@ steps:
       - |
         echo "Verificando se a função $_FUNCTION_NAME existe..."
         if gcloud functions describe $_FUNCTION_NAME --region=$_REGION --gen2 >/dev/null 2>&1; then
-          echo "Função encontrada. Deletando..."
+          echo "Função encontrada via Cloud Functions. Deletando..."
+          gcloud functions delete $_FUNCTION_NAME --region=$_REGION --gen2 --quiet
+        elif gcloud run services describe $_FUNCTION_NAME --region=$_REGION >/dev/null 2>&1; then
+          echo "Função encontrada via Cloud Run. Deletando pelo Cloud Functions..."
           gcloud functions delete $_FUNCTION_NAME --region=$_REGION --gen2 --quiet
         else
           echo "Função não encontrada. Pulando deleção."
