@@ -1,5 +1,4 @@
 substitutions:
-  _PROJECT_ID: 'data-ops-466417'
   _FUNCTION_NAME: 'fnc-kaggle-sample-sales' # Altere de acordo com a funcao a ser carregada
 
 logsBucket: 'cloudbuild-logs-cloud-function-466417'
