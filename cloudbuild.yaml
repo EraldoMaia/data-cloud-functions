@@ -1,7 +1,7 @@
 substitutions:
   _PROJECT_ID: 'data-ops-466417'
 
-logsBucket: 'gs://cloudbuild-logs-data-ops-466417'
+logsBucket: 'cloudbuild-logs-cloud-function-466417'
 timeout: 3600s
 
 steps:
