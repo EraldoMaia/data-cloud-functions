@@ -7,6 +7,20 @@ timeout: 3600s
 
 steps:
 
+  # 0. Deleta a função existente (se houver)
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Verificando se a função $_FUNCTION_NAME existe..."
+        if gcloud functions describe $_FUNCTION_NAME --region=$_REGION >/dev/null 2>&1; then
+          echo "Função encontrada. Deletando..."
+          gcloud functions delete $_FUNCTION_NAME --region=$_REGION --quiet
+        else
+          echo "Função não encontrada. Pulando etapa de deleção."
+        fi
+
   # 1. Zipa a pasta da funcao com suas dependencias
   - name: 'python:3.10'
     entrypoint: 'bash'
