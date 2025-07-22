@@ -1,3 +1,5 @@
+substitutions:
+  _FUNCTION_BUCKET: 'tf-cloud-functions-bucket'
 
 steps:
   - name: 'python:3.10'
@@ -16,7 +18,7 @@ steps:
     args:
       - 'functions'
       - 'deploy'
-      - 'kaggle-to-gcs'
+      - 'fnc-kaggle-sample-sales'
       - '--gen2'
       - '--runtime=python310'
       - '--entry-point=main'
