@@ -1,21 +1,20 @@
 substitutions:
   _PROJECT_ID: 'data-ops-466417'
-  _FUNCTION_BUCKET: 'tf-cloud-functions-bucket'
-  _REGION: 'southamerica-east1'
-  
+  _FUNCTION_NAME: 'fnc-kaggle-sample-sales' # Altere de acordo com a funcao a ser carregada
+
 logsBucket: 'cloudbuild-logs-cloud-function-466417'
 timeout: 3600s
 
 steps:
 
   # 1. Chama o build da função
-  #    Substitui os parâmetros _FUNCTION_BUCKET e _REGION
+  # Altere o _FUNCTION_NAME de acordo com a funcao a ser carregada
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - builds
       - submit
+      - ./functions/$_FUNCTION_NAME
       - --config=cloudbuild.yaml
-      - --substitutions=_FUNCTION_BUCKET=$FUNCTION_BUCKET,_REGION=$REGION
       - .
 
   # 2. Terraform Init
