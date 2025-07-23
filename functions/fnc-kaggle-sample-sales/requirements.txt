@@ -1,2 +1,2 @@
-opendatasets
-google-cloud-storage
+google-cloud
+kagglehub
