@@ -52,10 +52,9 @@ def main(request):
 
     # Obtendo os parâmetros da requisição, que devem ser passados via URL
     project_id      = request_json.get("project_id")
-    file_prefix     = request_json.get("file_prefix")
-    name_csv        = request_json.get("name_csv")
     bucket_name     = request_json.get("bucket_name")   
-    secret_url      = request_json.get("secret_url")    # Caminho da secret no Secret Manager
+    secret_url      = request_json.get("secret_url")    
+    file_prefix     = request_json.get("file_prefix")
 
     # Armazenando os valores das secrets do Kaggle em variáveis de ambiente
     secret_data = get_secret(secret_url)
@@ -77,8 +76,7 @@ def main(request):
     print(f"Encontrado CSV: {local_csv}")
 
     # 3. Enviar para o GCS
-    destination_name = f"{file_prefix}.csv" if file_prefix else name_csv
-    upload_to_gcs(bucket_name, local_csv, destination_name, project_id, folder_name=file_prefix)
+    upload_to_gcs(bucket_name=bucket_name,source_file_path= local_csv, destination_blob_name= f"{file_prefix}.csv", project_id=project_id, folder_name=file_prefix)
 
 
-    return f"gs://{bucket_name}/{destination_name}"
+    return f"gs://{bucket_name}/{file_prefix}.csv"
