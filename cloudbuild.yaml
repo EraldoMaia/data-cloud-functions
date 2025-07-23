@@ -1,5 +1,5 @@
 substitutions:
-  _FUNCTION_NAME: 'fnc-kaggle-sample-sales'     # Altere de acordo com a funcao a ser carregada
+  _FUNCTION_NAME: 'fnc-get-kaggle-load-gcs'     # Altere de acordo com a funcao a ser carregada
   _FUNCTION_BUCKET: 'tf-cloud-functions-bucket'
   _PROJECT_ID: "data-ops-466417"
   _REGION: 'southamerica-east1'  # Altere de acordo com a regiao
