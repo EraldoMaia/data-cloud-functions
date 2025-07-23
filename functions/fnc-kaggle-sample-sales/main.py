@@ -21,12 +21,17 @@ def get_bucket(bucket_name,project_id):
 
 def main(request):
 
+    # request
+    content_type = request.headers['content-type']
+    if content_type == 'application/json':
+        request_json = request.get_json(silent=True)
+
     # Obtendo os parâmetros da requisição, que devem ser passados via URL
-    project_id      = request.args.get("project_id")
-    file_prefix     = request.args.get("file_prefix")
-    name_csv        = request.args.get("name_csv")
-    bucket_name     = request.args.get("bucket_name")   # bucket_name = ""
-    secret_url      = request.args.get("secret_url")    # Caminho da secret no Secret Manager
+    project_id      = request_json.get("project_id")
+    file_prefix     = request_json.get("file_prefix")
+    name_csv        = request_json.get("name_csv")
+    bucket_name     = request_json.get("bucket_name")   
+    secret_url      = request_json.get("secret_url")    # Caminho da secret no Secret Manager
 
     # Armazenando os valores das secrets do Kaggle em variáveis de ambiente
     header_params = get_secret(secret_url)
@@ -40,5 +45,5 @@ def main(request):
     # Baixa o dataset do Kaggle e envia para o bucket do GCS
     dataset_path = kagglehub.dataset_download("kyanyoga/sample-sales-data",bucket_path=bucket_path, file_prefix=file_prefix, name_csv=name_csv)
     print("Dataset baixado em:", dataset_path)
-    
+
     return 'Successfully downloaded dataset from Kaggle and uploaded to GCS bucket.'
