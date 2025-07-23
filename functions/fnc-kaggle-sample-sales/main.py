@@ -39,5 +39,6 @@ def main(request):
 
     # Baixa o dataset do Kaggle e envia para o bucket do GCS
     dataset_path = kagglehub.dataset_download("kyanyoga/sample-sales-data",bucket_path=bucket_path, file_prefix=file_prefix, name_csv=name_csv)
-
-    return print("Dataset baixado em:", dataset_path)
+    print("Dataset baixado em:", dataset_path)
+    
+    return 'Successfully downloaded dataset from Kaggle and uploaded to GCS bucket.'
