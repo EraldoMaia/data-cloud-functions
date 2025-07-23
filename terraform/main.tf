@@ -1,6 +1,6 @@
-module "fnc_kaggle_sample_sales" {
+module "fnc_get_kaggle_load_gcs" {
   source        = "./modules/cloud_function"
-  name          = "fnc-kaggle-sample-sales"
+  name          = "fnc-get-kaggle-load-gcs"
   runtime       = "python310"
-  object        = "fnc-kaggle-sample-sales.zip"
+  object        = "fnc-get-kaggle-load-gcs.zip"
 }
