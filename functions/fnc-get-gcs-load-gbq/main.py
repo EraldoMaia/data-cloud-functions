@@ -33,7 +33,6 @@ def read_csv_from_gcs(bucket_name: str, file_path: str, project_id: str):
 
     return fieldnames_lower, rows
 
-
 def create_table_if_not_exists(project_id: str, dataset_id: str, table_id: str, schema_fields: list):
     """
     Cria a tabela no BigQuery caso ela não exista.
@@ -66,7 +65,6 @@ def create_table_if_not_exists(project_id: str, dataset_id: str, table_id: str, 
 
         print(f"Tabela {dataset_id}.{table_id} criada com sucesso e particionada por dt_insercao_registro.")
 
-
 def validate_schema(csv_header: list, project_id: str, dataset_id: str, table_id: str) -> bool:
     """
     Valida se o cabeçalho do CSV corresponde ao esquema da tabela BigQuery (exceto dt_insercao_registro).
@@ -77,7 +75,6 @@ def validate_schema(csv_header: list, project_id: str, dataset_id: str, table_id
 
     expected_schema = [field.name for field in table.schema if field.name != "dt_insercao_registro"]
     return set(csv_header) == set(expected_schema)
-
 
 def truncate_table_if_exists(project_id: str, dataset_id: str, table_id: str):
     """
@@ -96,7 +93,6 @@ def truncate_table_if_exists(project_id: str, dataset_id: str, table_id: str):
         
     except Exception:
         print(f"Tabela {table_ref} não existe. Nenhum truncate aplicado.")
-
 
 def insert_into_bigquery(project_id: str, dataset_id: str, table_id: str, rows: list, mode: str = "streaming"):
     """
@@ -123,6 +119,44 @@ def insert_into_bigquery(project_id: str, dataset_id: str, table_id: str, rows: 
         else:
             print(f"Inseridos {len(rows)} registros em streaming no {dataset_id}.{table_id}")
 
+def log_exec_success(project_id, dataset, table_name, qtd_linhas):
+    """
+    Registra uma carga bem-sucedida na tabela de log.
+    """
+    client      = bigquery.Client(project=project_id)
+    table_ref   = client.dataset("data_quality").table("tb_log_exec")
+
+    rows = [{
+        "projeto": project_id,
+        "dataset": dataset,
+        "table_name": table_name,
+        "qtd_linhas": qtd_linhas,
+        "dt_insercao_registro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }]
+
+    errors = client.insert_rows_json(table_ref, rows)
+    if errors:
+        print(f"[ERRO] Falha ao logar sucesso: {errors}")
+
+def log_exec_error(project_id, dataset, table_name, error_message):
+    """
+    Registra uma falha na carga na tabela de erro.
+    """
+    client      = bigquery.Client(project=project_id)
+    table_ref   = client.dataset("data_quality").table("tb_log_error")
+
+    rows = [{
+        "projeto": project_id,
+        "dataset": dataset,
+        "table_name": table_name,
+        "error_mensage": error_message,
+        "dt_insercao_registro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }]
+
+    errors = client.insert_rows_json(table_ref, rows)
+    if errors:
+        print(f"[ERRO] Falha ao logar erro: {errors}")
+
 
 def main(request):
 
@@ -144,20 +178,33 @@ def main(request):
     table_id            = request_json.get("file_prefix")
     mode                = request_json.get("mode", "batch")  # default: bath
 
-    # 1. Lê o CSV do GCS
-    csv_header, rows = read_csv_from_gcs(bucket_name, gcs_file_path, project_id)
+    try:
+        # 1. Lê o CSV do GCS
+        csv_header, rows = read_csv_from_gcs(bucket_name, gcs_file_path, project_id)
 
-    # 2. Cria tabela se não existir
-    create_table_if_not_exists(bq_raw_project_id, dataset_id, table_id, csv_header)
+        # 2. Cria tabela se não existir
+        create_table_if_not_exists(bq_raw_project_id, dataset_id, table_id, csv_header)
 
-    # 3. Valida esquema
-    if not validate_schema(csv_header, bq_raw_project_id, dataset_id, table_id):
-        raise ValueError(f"Esquema do CSV não corresponde ao da tabela {dataset_id}.{table_id}!")
+        # 3. Valida esquema
+        if not validate_schema(csv_header, bq_raw_project_id, dataset_id, table_id):
+            raise ValueError(f"Esquema do CSV não corresponde ao da tabela {dataset_id}.{table_id}!")
 
-    # 4. Trunca a tabela se existir
-    truncate_table_if_exists(bq_raw_project_id, dataset_id, table_id)
+        # 4. Trunca a tabela se existir
+        truncate_table_if_exists(bq_raw_project_id, dataset_id, table_id)
 
-    # 5. Insere os dados
-    insert_into_bigquery(bq_raw_project_id, dataset_id, table_id, rows, mode=mode)
+        # 5. Insere os dados
+        insert_into_bigquery(bq_raw_project_id, dataset_id, table_id, rows, mode=mode)
+        
+        # 6. Insere os dados de execução no log de sucesso
+        log_exec_success(project_id, dataset_id, table_id, len(rows))
 
-    return f"{len(rows)} registros inseridos em {dataset_id}.{table_id} via {mode}"
+        return f"{len(rows)} registros inseridos em {dataset_id}.{table_id} via {mode}"
+    
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[ERRO] {error_msg}")
+
+        # 7. Insere os dados de execução no log de erro
+        log_exec_error(project_id, dataset_id, table_id, error_msg)
+
+        return f"Erro ao carregar os dados: {error_msg}", 500
