@@ -134,9 +134,9 @@ def log_exec_success(project_id, bq_table_project_id, dataset, table_name, qtd_l
         "dt_insercao_registro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }]
 
-    errors = client.insert_rows_json(table_ref, rows)
-    if errors:
-        print(f"[ERRO] Falha ao logar sucesso: {errors}")
+    job = client.load_table_from_json(rows, table_ref)
+    job.result()
+    print(f"Dados de execução logados com sucesso: {qtd_linhas} registros inseridos em {dataset}.{table_name}")
 
 def log_exec_error(project_id, bq_table_project_id, dataset, table_name, error_message):
     """
@@ -153,9 +153,9 @@ def log_exec_error(project_id, bq_table_project_id, dataset, table_name, error_m
         "dt_insercao_registro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }]
 
-    errors = client.insert_rows_json(table_ref, rows)
-    if errors:
-        print(f"[ERRO] Falha ao logar erro: {errors}")
+    job = client.load_table_from_json(rows, table_ref)
+    job.result()
+    print(f"Erro logado com sucesso: {error_message} para {dataset}.{table_name}")
 
 
 def main(request):
