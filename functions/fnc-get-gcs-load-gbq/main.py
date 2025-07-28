@@ -119,7 +119,7 @@ def insert_into_bigquery(project_id: str, dataset_id: str, table_id: str, rows: 
         else:
             print(f"Inseridos {len(rows)} registros em streaming no {dataset_id}.{table_id}")
 
-def log_exec_success(project_id, dataset, table_name, qtd_linhas):
+def log_exec_success(project_id, bq_table_project_id, dataset, table_name, qtd_linhas):
     """
     Registra uma carga bem-sucedida na tabela de log.
     """
@@ -127,7 +127,7 @@ def log_exec_success(project_id, dataset, table_name, qtd_linhas):
     table_ref   = client.dataset("data_quality").table("tb_log_exec")
 
     rows = [{
-        "projeto": project_id,
+        "projeto": bq_table_project_id,
         "dataset": dataset,
         "table_name": table_name,
         "qtd_linhas": qtd_linhas,
@@ -138,7 +138,7 @@ def log_exec_success(project_id, dataset, table_name, qtd_linhas):
     if errors:
         print(f"[ERRO] Falha ao logar sucesso: {errors}")
 
-def log_exec_error(project_id, dataset, table_name, error_message):
+def log_exec_error(project_id, bq_table_project_id, dataset, table_name, error_message):
     """
     Registra uma falha na carga na tabela de erro.
     """
@@ -146,7 +146,7 @@ def log_exec_error(project_id, dataset, table_name, error_message):
     table_ref   = client.dataset("data_quality").table("tb_log_error")
 
     rows = [{
-        "projeto": project_id,
+        "projeto": bq_table_project_id,
         "dataset": dataset,
         "table_name": table_name,
         "error_mensage": error_message,
@@ -196,7 +196,7 @@ def main(request):
         insert_into_bigquery(bq_raw_project_id, dataset_id, table_id, rows, mode=mode)
         
         # 6. Insere os dados de execução no log de sucesso
-        log_exec_success(project_id, dataset_id, table_id, len(rows))
+        log_exec_success(project_id, bq_raw_project_id, dataset_id, table_id, len(rows))
 
         return f"{len(rows)} registros inseridos em {dataset_id}.{table_id} via {mode}"
     
@@ -205,6 +205,6 @@ def main(request):
         print(f"[ERRO] {error_msg}")
 
         # 7. Insere os dados de execução no log de erro
-        log_exec_error(project_id, dataset_id, table_id, error_msg)
+        log_exec_error(project_id, bq_raw_project_id, dataset_id, table_id, error_msg)
 
         return f"Erro ao carregar os dados: {error_msg}", 500
